@@ -48,7 +48,7 @@ module Platanus
             end
 
             # Save model and push attribute, cache last stacked attribute.
-            self.save! if _options[:autosave] and (self.new_record? or self.changed?)
+            self.save! if _options.fetch(:autosave, true) and (self.new_record? or self.changed?)
             raise ActiveRecord::RecordInvalid.new(obj) unless self.send(tname).send('<<',obj)
             @_stacked_last = obj
 
