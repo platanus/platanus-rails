@@ -9,6 +9,7 @@ require 'platanus/cmap'
 require 'platanus/http_helpers'
 
 # require 'platanus/onetime'
+# require 'platanus/gcontroller'
 # require 'platanus/template/spreadsheet'
 # require 'platanus/template/prawn'
 

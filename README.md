@@ -1,6 +1,8 @@
 # Platanus
 
-TODO: Write a gem description
+Platan.us toolbelt.
+
+This gem includes various ruby and rails utility classes we use across most of our rails proyects.
 
 ## Installation
 
@@ -16,7 +18,35 @@ Or install it yourself as:
 
     $ gem install platanus
 
-## Usage
+## Tools & Usage
+
+### Stacked
+
+TODO: Write usage instructions here
+
+### Activable
+
+TODO: Write usage instructions here
+
+### Traceable
+
+TODO: Write usage instructions here
+
+### Canned
+
+TODO: Write usage instructions here
+
+### Gobal Controller
+
+Requires explicit inclusion:
+
+	require 'platanus/gcontroller'
+
+### Template: Spreadsheet
+
+TODO: Write usage instructions here
+
+### Template: prawn
 
 TODO: Write usage instructions here
 
