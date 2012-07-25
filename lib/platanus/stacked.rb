@@ -22,6 +22,10 @@ module Platanus
         to_cache_prf = if _options[:cache_prf].nil? then 'last_' else _options.delete(:cache_prf) end
         stack_key = if _options[:stack_key].nil? then 'created_at DESC, id DESC' else _options.delete(:stack_key) end
 
+        # Retrieve callbacks
+        before_push = _options.delete(:before_push)
+        after_push = _options.delete(:after_push)
+
         _options[:order] = stack_key
         _options[:limit] = 10 if _options[:limit].nil?
 
@@ -39,7 +43,7 @@ module Platanus
           self.class.transaction do
 
             # Execute before callbacks
-            self.send(_options[:before_push], obj) if _options.has_key? :before_push
+            self.send(before_push, obj) unless before_push.nil?
             block.call(self, obj) unless block.nil?
 
             # Cache required fields
@@ -53,7 +57,7 @@ module Platanus
             @_stacked_last = obj
 
             # Execute after callback
-            self.send(_options[:after_push], obj) if _options.has_key? :after_push
+            self.send(after_push, obj) unless after_push.nil?
           end
         end
 
