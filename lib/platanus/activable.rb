@@ -10,7 +10,6 @@ module Platanus
   # This module also defines a +remove+ callback.
   #
   module Activable
-
     def self.included(base)
       base.define_callbacks :remove
       base.attr_protected :removed_at
@@ -60,6 +59,16 @@ module Platanus
           self.save!
         end
       end
+    end
+  end
+
+  ## Same as Activable but defines an 'alive' scope and no default scope.
+  module ActivableExplicit
+    def self.included(base)
+      base.define_callbacks :remove
+      base.attr_protected :removed_at
+      base.send(:scope, 'alive', base.where(:removed_at => nil))
+      base.extend Platanus::Activable::ClassMethods
     end
   end
 end
