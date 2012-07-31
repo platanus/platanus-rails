@@ -73,7 +73,7 @@ module Platanus
           # Storing the last stacked value will not prevent race conditions
           # when simultaneous updates occur.
           return @_stacked_last unless @_stacked_last.nil?
-          self.send(_name).first
+          @_stacked_last = self.send(_name).first
         end
 
         # Generate shorcut properties for cached attributes.
