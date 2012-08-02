@@ -44,20 +44,21 @@ module Platanus
 
     module ClassMethods
 
-      def attr_enum(_target, _module)
+      def attr_enum(_target, _module, _options={})
 
         map = {}
+        pname = _options.has_key?(:property_name) ? _options[:property_name] : (_target.to_s + '_str')
 
         # Extract module constants
         _module.constants.each { |cname| map[_module.const_get(cname)] = cname.to_s.downcase }
 
         # Add string getter
-        self.send(:define_method, _target.to_s + '_str') do
+        self.send(:define_method, pname) do
           map.fetch(self.send(_target), '')
         end
 
         # Add string setter
-        self.send(:define_method, _target.to_s + '_str=') do |value|
+        self.send(:define_method, pname + '=') do |value|
           map.each_pair do |k,v|
             if v == value
               self.send(_target.to_s + '=', k)
@@ -67,8 +68,8 @@ module Platanus
           raise InvalidEnumName
         end
 
-        # Add value validator
-        self.validates _target, inclusion: { :in => map.keys }
+        # Add value validator (unless validation is disabled)
+        self.validates _target, inclusion: { :in => map.keys } if _options.fetch(:validate, true)
       end
     end
   end
