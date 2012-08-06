@@ -41,6 +41,7 @@ module Platanus
       end
 
       base.extend ClassMethods
+      base.send :include, InstanceMethods
     end
   end
 
@@ -70,43 +71,47 @@ module Platanus
 
   end
 
-  # # Renders an empty response
-  def api_respond_empty(_options={})
-    _options[:json] = {}
-    api_respond_with(_options)
-    render_headers
-  end
+  module InstanceMethods
 
-  # # Renders a regular response
-  def api_respond_with(*_params)
-    if _params.last.is_a? Hash
-      _options = _params.last
-      _params = _params[0...-1]
-    else
-      _options = {}
+    # # Renders an empty response
+    def api_respond_empty(_options={})
+      _options[:json] = {}
+      api_respond_with(_options)
+      render_headers
     end
 
-    respond_with(*_params) do |format|
-      format.json { render _options }
-    end
-    render_headers
-  end
+    # # Renders a regular response
+    def api_respond_with(*_params)
+      if _params.last.is_a? Hash
+        _options = _params.last
+        _params = _params[0...-1]
+      else
+        _options = {}
+      end
 
-  # # Renders an error response
-  #
-  # @param [String, Fixnum] _status Response error code.
-  # @param [object] _error_obj Error object to serialize in response.
-  #
-  def api_respond_error(_status, _error_obj={})
-    respond_with do |format|
-      format.json { render :status => _status, :json => _error_obj }
+      respond_with(*_params) do |format|
+        format.json { render _options }
+      end
+      render_headers
     end
-    render_headers
-  end
 
-  def render_headers
-    response.headers['Access-Control-Allow-Headers'] = 'X-Requested-With,Content-Type'
-    response.headers['Access-Control-Allow-Methods'] = 'OPTIONS,GET,HEAD,POST,PUT,DELETE'
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    # # Renders an error response
+    #
+    # @param [String, Fixnum] _status Response error code.
+    # @param [object] _error_obj Error object to serialize in response.
+    #
+    def api_respond_error(_status, _error_obj={})
+      respond_with do |format|
+        format.json { render :status => _status, :json => _error_obj }
+      end
+      render_headers
+    end
+
+    def render_headers
+      response.headers['Access-Control-Allow-Headers'] = 'X-Requested-With,Content-Type'
+      response.headers['Access-Control-Allow-Methods'] = 'OPTIONS,GET,HEAD,POST,PUT,DELETE'
+      response.headers['Access-Control-Allow-Origin'] = '*'
+    end
+
   end
 end
