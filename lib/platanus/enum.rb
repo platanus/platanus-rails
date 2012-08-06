@@ -68,6 +68,18 @@ module Platanus
           raise InvalidEnumName
         end
 
+        # Retrieve singleton class to define new class methods
+        klass = class << self; self; end
+
+        # Add parse function
+        klass.send(:define_method, 'parse_' + _target.to_s) do |value|
+          value = value.to_s
+          map.each_pair do |k,v|
+            return k if v == value
+          end
+          return nil
+        end
+
         # Add value validator (unless validation is disabled)
         self.validates _target, inclusion: { :in => map.keys } if _options.fetch(:validate, true)
       end

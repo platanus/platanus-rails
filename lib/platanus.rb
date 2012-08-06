@@ -6,6 +6,7 @@ require 'platanus/activable'
 require 'platanus/traceable'
 require 'platanus/layered'
 require 'platanus/cmap'
+require 'platanus/enum'
 require 'platanus/http_helpers'
 
 # require 'platanus/onetime'
