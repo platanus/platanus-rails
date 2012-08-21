@@ -20,24 +20,24 @@ module Platanus
       base.rescue_from 'Exception' do |exc|
         logger.error exc.message
         logger.error exc.backtrace.join("\n")
-        api_respond_error(:internal_server_error, { type: exc.class.to_s, msg: exc.message } )
+        api_respond_error(:internal_server_error, { msg: 'server_error', exception: { type: exc.class.to_s, msg: exc.message } } )
       end
 
       base.rescue_from 'ActiveRecord::RecordNotFound' do |exc|
-        api_respond_error(:not_found)
-      end
-
-      base.rescue_from 'ActiveRecord::RecordInvalid' do |exc|
-        api_respond_error(:unprocessable_entity, { why: 'invalid', errors: exc.record.errors } )
+        api_respond_error(:not_found, { msg: 'record_not_found', detail: exc.message })
       end
 
       base.rescue_from 'ActiveModel::MassAssignmentSecurity::Error' do |exc|
-        api_respond_error(:bad_request, { why: 'attribute_protected' } )
+        api_respond_error(:bad_request, { msg: 'protected_attributes', detail: exc.message } )
+      end
+
+      base.rescue_from 'ActiveRecord::RecordInvalid' do |exc|
+        api_respond_error(:bad_request, { msg: 'invalid_attributes', errors: exc.record.errors } )
       end
 
       # Platanus error support (of course)
       base.rescue_from 'Platanus::StatusError' do |exc|
-        api_respond_error(exc.status, exc)
+        api_respond_error(exc.status, { msg: exc.message })
       end
 
       base.extend ClassMethods
@@ -67,6 +67,9 @@ module Platanus
     # # Enables cors
     def enable_cors
       # TODO: maybe cors support should be implemented as a middleware.
+      # response.headers['Access-Control-Allow-Headers'] = 'X-Requested-With,Content-Type'
+      # response.headers['Access-Control-Allow-Methods'] = 'OPTIONS,GET,HEAD,POST,PUT,DELETE'
+      # response.headers['Access-Control-Allow-Origin'] = '*'
     end
 
   end
@@ -77,7 +80,6 @@ module Platanus
     def api_respond_empty(_options={})
       _options[:json] = {}
       api_respond_with(_options)
-      render_headers
     end
 
     # # Renders a regular response
@@ -92,7 +94,6 @@ module Platanus
       respond_with(*_params) do |format|
         format.json { render _options }
       end
-      render_headers
     end
 
     # # Renders an error response
@@ -104,13 +105,6 @@ module Platanus
       respond_with do |format|
         format.json { render :status => _status, :json => _error_obj }
       end
-      render_headers
-    end
-
-    def render_headers
-      response.headers['Access-Control-Allow-Headers'] = 'X-Requested-With,Content-Type'
-      response.headers['Access-Control-Allow-Methods'] = 'OPTIONS,GET,HEAD,POST,PUT,DELETE'
-      response.headers['Access-Control-Allow-Origin'] = '*'
     end
 
   end
