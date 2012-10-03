@@ -20,6 +20,10 @@ Or install it yourself as:
 
 ## Tools & Usage
 
+### Enum
+
+TODO: Write usage instructions here
+
 ### Stacked
 
 TODO: Write usage instructions here

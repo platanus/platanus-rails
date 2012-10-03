@@ -204,8 +204,8 @@ module Platanus
         # This can optionally take an inherit parameter to use
         # another profile as base for the new one.
         def profile(_name, _options={})
-          inherit = _options.fetch(:inherits,nil)
-          def_test = _options.fetch(:default,:equals)
+          inherit = _options.fetch(:inherits, nil)
+          def_test = _options.fetch(:default, :equals)
           yield self.profiles[_name.to_s] = BProfile.new(self,self.profiles[inherit],def_test)
         end
 
