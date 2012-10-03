@@ -37,10 +37,10 @@ module Platanus
         # Prepare cached attributes, generate read-only aliases without prefix.
         unless to_cache.nil?
           to_cache = to_cache.map do |name|
-            name = name.to_s; fullname = to_cache_prf + name
-            attr_protected(fullname)
-            send :define_method, name do self.send(fullname) end
-            fullname
+            name = name.to_s
+            # attr_protected(to_cache_prf + name)
+            send :define_method, name do self.send(to_cache_prf + name) end
+            name
           end
         end
 
@@ -57,7 +57,7 @@ module Platanus
 
             # cache required fields
             unless to_cache.nil?
-              to_cache.each { |name| send(name + '=', obj.send(name)) }
+              to_cache.each { |name| send(to_cache_prf + name + '=', obj.send(name)) }
             end
 
             # push attribute, this will save the model if new.
