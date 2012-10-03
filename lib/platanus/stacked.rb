@@ -39,7 +39,7 @@ module Platanus
           to_cache = to_cache.map do |name|
             name = name.to_s; fullname = to_cache_prf + name
             attr_protected(fullname)
-            send :define_method, name { self.send(fullname) }
+            send :define_method, name do self.send(fullname) end
             fullname
           end
         end
