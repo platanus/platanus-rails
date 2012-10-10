@@ -1,5 +1,15 @@
+# validators/email.rb : Email validator for active record
+#
+# Copyright April 2012, Ignacio Baixas +mailto:ignacio@platan.us+.
+
 require 'mail'
 
+## Adds the "email" validation to active record
+#
+# Usage:
+#
+#   validates :email_col, email: true
+#
 class EmailValidator < ActiveModel::EachValidator
   def validate_each(_record, _attribute, _value)
     return if _value.nil?
