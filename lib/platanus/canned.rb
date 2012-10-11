@@ -10,7 +10,6 @@ module Platanus
     class Interrupt < Exception; end
     class Error < StandardError; end
     class AuthError < Error; end
-    class SetupError < Error; end
 
     # Controller extension, include this in the the base application
     # controller and use the barracks_setup method to define the profiles
@@ -169,7 +168,7 @@ module Platanus
 
             # Extract user and action features.
             action_feat = _action_feats[sym]
-            raise SetupError if action_feat.nil?
+            return false if action_feat.nil?
             user_feat = _user_feats[user_sym]
             return false if user_feat.nil?
             next if user_feat == :wildcard # Wildcard matches always
