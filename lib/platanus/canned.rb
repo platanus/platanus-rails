@@ -47,7 +47,7 @@ module Platanus
         end
 
         # Test if a profile can execute the current action, raises a
-        # BarracksInterrupt exception if conditions are met.
+        # Interrupt exception if conditions are met.
         def test(_profile, _user_feats, _tag=nil)
           if @owner.class.brk_definition.can?(_profile, @action, @feats, _user_feats)
             @tag = _tag
@@ -64,7 +64,7 @@ module Platanus
 
       # Test if an action can be executed using the currently loaded roles.
       def can?(_action, _action_feat)
-        wrapper = ActionWrapper.new(self,_action,_action_feat)
+        wrapper = ActionWrapper.new(self, _action, _action_feat)
         begin
           provider = if brk_provider.is_a? Symbol then self.method(brk_provider) else brk_provider end
           wrapper.instance_eval &provider
@@ -111,48 +111,56 @@ module Platanus
       # Auxiliary class used by profile manager to store profiles.
       class BProfile
 
-        # This is required for the copy constructor to work.
-        protected
         attr_reader :rules
         attr_reader :def_test
-        public
 
         # The initializer takes another profile as rules base.
         def initialize(_owner, _base, _def_test)
           @owner = _owner
-          @rules = if _base.nil? then {} else _base.rules.clone end
+          @rules = Hash.new { |h, k| h[k] = [] }
+          _base.each { |k, tests| @rules[k] = tests.clone } unless _base.nil?
           @def_test = _def_test
         end
 
         # Adds a new ability.
         def ability(*_args)
-          @rules[_args.first] = tests = {}
+          tests = {}
           if _args.last.is_a? Hash
-            hook = _args.last.delete(@hook)
             _args[1...-1].each { |sym| tests[sym] = @def_test }
             tests.merge!(_args.last)
           else
-            hook = nil
             _args[1..-1].each { |sym| tests[sym] = @def_test }
           end
+          @rules[_args.first] << tests
         end
 
         # Removes an action by its name.
-        def remove(_name)
+        def clean(_name)
           @rules.delete(_name)
         end
 
         # Test an action agaist this profile
         def test(_action, _action_feats, _user_feats)
-          tests = @rules[_action]
-          return false if tests.nil?
-          tests.each do |sym, test|
+          return false unless tests.has_key? _action
+
+          # if any of the test groups passes, then test is passed.
+          @rules[_action].each do |tests|
+            return true if self.test_aux(tests, _action_feats, _user_feats)
+          end
+
+          return false
+        end
+
+        # Run a test group over a set of features
+        def test_aux(_tests, _action_feats, _user_feats)
+
+          _tests.each do |sym, test|
 
             # Analize test.
             if test.is_a? Hash
-              test_name = test.fetch(:name,@def_test)
+              test_name = test.fetch(:name, @def_test)
               test_transform = test[:transform]
-              user_sym = test.fetch(:key,sym)
+              user_sym = test.fetch(:key, sym)
             else
               test_name = test
               test_transform = nil
@@ -167,7 +175,7 @@ module Platanus
             next if user_feat == :wildcard # Wildcard matches always
 
             # Compare features.
-            action_feat = _owner.send(test_transform,action_feat) unless test_transform.nil?
+            action_feat = @owner.send(test_transform,action_feat) unless test_transform.nil?
             case test_name
             when :equals
               return false unless user_feat == action_feat
@@ -180,7 +188,7 @@ module Platanus
             else
               # TODO: Check that method exists first.
               if @owner.method_defined? test_name
-                return false unless @owner.send(test_name,action_feat,user_value)
+                return false unless @owner.send(test_name, action_feat, user_feat)
               end
             end
           end
@@ -204,17 +212,19 @@ module Platanus
         # This can optionally take an inherit parameter to use
         # another profile as base for the new one.
         def profile(_name, _options={})
-          inherit = _options.fetch(:inherits, nil)
-          def_test = _options.fetch(:default, :equals)
-          yield self.profiles[_name.to_s] = BProfile.new(self,self.profiles[inherit],def_test)
+          yield self.profiles[_name.to_s] = BProfile.new(
+            self,
+            self.profiles[_options.fetch(:inherits, nil)],
+            _options.fetch(:default, :equals)
+          )
         end
 
         # Test if a user (profile + user data) can execute a given
         # action (action name + action data).
-        def can?(_profile, _action, _action_feat, _user_data)
+        def can?(_profile, _action, _action_feat, _user_feat)
           profile = self.profiles[_profile.to_s]
           return false if profile.nil?
-          return profile.test(_action,_action_feat,_user_data)
+          return profile.test(_action, _action_feat, _user_feat)
         end
       end
     end
