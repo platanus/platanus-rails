@@ -111,13 +111,13 @@ module Platanus
       class BProfile
 
         attr_reader :rules
-        attr_reader :def_test
 
         # The initializer takes another profile as rules base.
-        def initialize(_owner, _base, _def_test)
+        def initialize(_owner, _base, _def_test=:equals_int)
           @owner = _owner
           @rules = Hash.new { |h, k| h[k] = [] }
-          _base.each { |k, tests| @rules[k] = tests.clone } unless _base.nil?
+          _base.rules.each { |k, tests| @rules[k] = tests.clone } unless _base.nil?
+          raise Error.new 'Must provide a default test' if _def_test.nil?
           @def_test = _def_test
         end
 
@@ -125,10 +125,10 @@ module Platanus
         def ability(*_args)
           tests = {}
           if _args.last.is_a? Hash
-            _args[1...-1].each { |sym| tests[sym] = @def_test }
+            _args[1...-1].each { |sym| tests[sym] = {} }
             tests.merge!(_args.last)
           else
-            _args[1..-1].each { |sym| tests[sym] = @def_test }
+            _args[1..-1].each { |sym| tests[sym] = {} }
           end
           @rules[_args.first] << tests
         end
@@ -140,7 +140,7 @@ module Platanus
 
         # Test an action agaist this profile
         def test(_action, _action_feats, _user_feats)
-          return false unless tests.has_key? _action
+          return false unless @rules.has_key? _action
 
           # if any of the test groups passes, then test is passed.
           @rules[_action].each do |tests|
@@ -155,37 +155,37 @@ module Platanus
 
           _tests.each do |sym, test|
 
-            # Analize test.
-            if test.is_a? Hash
-              test_name = test.fetch(:name, @def_test)
-              test_transform = test[:transform]
-              user_sym = test.fetch(:key, sym)
-            else
-              test_name = test
-              test_transform = nil
-              user_sym = sym
+            # extract action feature
+            action_feat = _action_feats[sym]
+
+            # special "nil" test
+            test_name = test.fetch(:test, @def_test)
+            if test_name == :nil
+              return false unless action_feat.nil?
+              next
             end
 
-            # Extract user and action features.
-            action_feat = _action_feats[sym]
+            # make sure action feat is avaliable
             return false if action_feat.nil?
-            user_feat = _user_feats[user_sym]
-            return false if user_feat.nil?
-            next if user_feat == :wildcard # Wildcard matches always
 
-            # Compare features.
-            action_feat = @owner.send(test_transform,action_feat) unless test_transform.nil?
-            case test_name
-            when :equals
-              return false unless user_feat == action_feat
-            when :equals_int
-              return false unless user_feat.to_i == action_feat.to_i
-            when :if_higher
-              return false unless user_feat > action_feat
-            when :if_lower
-              return false unless user_feat < action_feat
+            # extract user feature
+            if test.has_key? :value
+              user_feat = test[:value]
             else
-              # TODO: Check that method exists first.
+              user_feat = _user_feats[test.fetch(:key, sym)]
+              # TODO: maybe the following tests belong to the "compare features" section
+              return false if user_feat.nil?
+              next if user_feat == :wildcard # Wildcard matches always
+            end
+
+            # compare features.
+            case test_name
+            when :equals;     return false unless user_feat == action_feat
+            when :equals_int; return false unless user_feat.to_i == action_feat.to_i
+            when :if_higher;  return false unless user_feat > action_feat
+            when :if_lower;   return false unless user_feat < action_feat
+            else
+              # call custom test
               if @owner.method_defined? test_name
                 return false unless @owner.send(test_name, action_feat, user_feat)
               end
