@@ -186,7 +186,7 @@ module Platanus
             when :if_lower;   return false unless user_feat < action_feat
             else
               # call custom test
-              if @owner.method_defined? test_name
+              if @owner.respond_to? test_name
                 return false unless @owner.send(test_name, action_feat, user_feat)
               end
             end
