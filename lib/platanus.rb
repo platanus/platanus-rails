@@ -13,6 +13,8 @@ require 'platanus/http_helpers'
 # require 'platanus/template/spreadsheet'
 # require 'platanus/template/prawn'
 
+require 'platanus/serializers/json_sym'
+
 module Platanus
   # Your code goes here...
 end

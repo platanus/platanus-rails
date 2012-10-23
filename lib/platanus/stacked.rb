@@ -78,14 +78,14 @@ module Platanus
         # setup main association
         has_many _name, _options
 
-        cache_step = ->(_ctx, _top) {
+        cache_step = ->(_ctx, _top, _top_is_new) {
           # cache required fields
           return if to_cache.nil?
           to_cache.each do |cache_attr|
             value = if cache_attr.has_key? :from
               _top.nil? ? _top : _top.send(cache_attr[:from])
             else
-              _ctx.send(cache_attr[:virtual], _top)
+              _ctx.send(cache_attr[:virtual], _top, _top_is_new)
             end
             _ctx.send(cache_attr[:to].to_s + '=', value)
           end
@@ -103,7 +103,7 @@ module Platanus
           self.class.transaction do
 
             # cache, then save if new, then push and finally process state
-            cache_step.call(self, obj)
+            cache_step.call(self, obj, true)
             self.save! if self.new_record? # make sure there is an id BEFORE pushing
             raise ActiveRecord::RecordInvalid.new(obj) unless send(tname).send('<<',obj)
             after_step.call(self, obj)
@@ -125,7 +125,7 @@ module Platanus
 
               # find current top, then restore stack state
               top = self.send(_name).first
-              cache_step.call(self, top)
+              cache_step.call(self, top, false)
               after_step.call(self, top)
 
               self.save! if self.changed?
