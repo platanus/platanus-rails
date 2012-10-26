@@ -7,7 +7,6 @@ module Platanus
   # User profiling and authorization module
   module Canned2
 
-    class Interrupt < Exception; end
     class Error < StandardError; end
     class AuthError < Error; end
     class SetupError < Error; end
