@@ -45,6 +45,8 @@ module Platanus
 
             # call initializer block
             profiles = _provider.nil? ? self.send(_provider) : self.instance_eval(&_block)
+            raise AuthError if profiles.nil?
+            profiles = [profiles] unless profiles.is_a? Array
 
             # call resource loader
             brk_before = self.class.brk_before
