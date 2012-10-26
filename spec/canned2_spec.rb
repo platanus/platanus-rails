@@ -32,7 +32,7 @@ describe Platanus::Canned2 do
       true
     end
 
-    profile :user, default: :equals_int do
+    profile :user, matcher: :equals_int do
 
       # Simple allows
       allow 'rute1#action1'

@@ -95,13 +95,15 @@ module Platanus
 
       attr_reader :rules
       attr_reader :def_matcher
+      attr_reader :def_resource
 
       # The initializer takes another profile as rules base.
-      def initialize(_base, _def_matcher=:equals_int)
+      def initialize(_base, _def_matcher, _def_resource)
         @rules = Hash.new { |h, k| h[k] = [] }
         _base.rules.each { |k, tests| @rules[k] = tests.clone } unless _base.nil?
         raise Error.new 'Must provide a default test' if _def_matcher.nil?
         @def_matcher = _def_matcher
+        @def_resource = _def_resource
       end
 
       ## Adds an "allowance" rule
@@ -137,31 +139,32 @@ module Platanus
     ## Rule block context
     class RuleContext
 
-      def initialize(_ctx, _tests, _def_matcher)
+      def initialize(_ctx, _tests, _def_matcher, _def_resource)
         @ctx = _ctx
         @tests = _tests
         @def_matcher = _def_matcher
+        @def_resource = UponContext.load_value_for(@ctx, _def_resource)
         @passed = nil
       end
 
       def passed?; @passed end
 
-      def upon(_expr=nil, &_block)
+      def upon(_res=nil, &_block)
         return if @passed == false
-        res = UponContext.load_value_for(@ctx, _expr)
+        res = if _res.nil? then @def_resource else UponContext.load_value_for(@ctx, _res) end
         @passed = UponContext.new(res, @ctx, @tests, @def_matcher).instance_eval(&_block)
       end
 
-      def upon_one(_expr, &_block)
+      def upon_one(_res, &_block)
         return if @passed == false
-        coll = UponContext.load_value_for(@ctx, _expr)
+        coll = if _res.nil? then @def_resource else UponContext.load_value_for(@ctx, _res) end
         # TODO: Check coll type
         @passed = coll.any? { |res| UponContext.new(res, @ctx, @tests, @def_matcher).instance_eval &_block }
       end
 
-      def upon_all(_expr, &_block)
+      def upon_all(_res, &_block)
         return if @passed == false
-        coll = UponContext.load_value_for(@ctx, _expr)
+        coll = if _res.nil? then @def_resource else UponContext.load_value_for(@ctx, _res) end
         # TODO: Check coll type
         @passed = coll.all? { |res| UponContext.new(res, @ctx, @tests, @def_matcher).instance_eval &_block }
       end
@@ -294,12 +297,14 @@ module Platanus
         #
         # @param [String|Symbol] _name Profile name.
         # @param [String|Symbol] :inherits Name of profile to inherit rules from.
-        # @param [Symbol] :default Default test name
+        # @param [Symbol] :matcher Default matcher for matches tests
+        # @param [Symbol] :resource Default resource for upon expressions
         #
         def profile(_name, _options={}, &_block)
           profile = @@profiles[_name.to_s] = Profile.new(
             @@profiles[_options.fetch(:inherits, nil).to_s],
-            _options.fetch(:default, :equals)
+            _options.fetch(:matcher, :equals),
+            _options.fetch(:resource, nil)
           )
           profile.instance_eval &_block
         end
@@ -310,7 +315,7 @@ module Platanus
           return if profile.nil?
           profile.rules[_action].any? do |rule|
             next true if rule.nil?
-            rule_ctx = RuleContext.new _ctx, @@tests, profile.def_matcher
+            rule_ctx = RuleContext.new _ctx, @@tests, profile.def_matcher, profile.def_resource
             rule_ctx.instance_eval(&rule)
             rule_ctx.passed?
           end
