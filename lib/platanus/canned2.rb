@@ -203,11 +203,11 @@ module Platanus
       # @param [Symbol] _what parameter name.
       # @param [Symbol] :using matcher (:equals|:equals_int|:higher_than|:lower_than),
       #   uses profile default matcher if not provided.
-      # @param [Symbol|String] :on key or expression used to retrieve
+      # @param [Symbol|String] :key key or expression used to retrieve
       #   the matching value for current resource, if not given then _what is used.
       # @param [Mixed] :value if given, this value is matched against parameter instead of resource's.
       #
-      def matches(_what, _options={})
+      def same(_what, _options={})
         matcher = _options.fetch(:using, @def_matcher)
 
         param = @ctx.params[_what]
@@ -216,7 +216,7 @@ module Platanus
         if _options.has_key? :value
           user_value = _options[:value]
         else
-          user_value = self.class.load_value_for(@res, _options.fetch(:on, _what))
+          user_value = self.class.load_value_for(@res, _options.fetch(:key, _what))
           return false if user_value.nil?
           return true if user_value == :wildcard
         end
@@ -231,7 +231,6 @@ module Platanus
           false
         end
       end
-      alias :match :matches
 
       ## Test whether the current resource passes a given test.
       #
@@ -240,16 +239,24 @@ module Platanus
       # @param [Symbol] _test test identifier.
       # @param [Symbol|String] :on optional key or expression used to retrieve
       #   from the resource the value to be passed to the test instead of the resource.
+      # @param [Block] _block block to be executed (if test identifier is not given)
       #
-      def certifies(_test, _options={})
-        test = @tests[_test]
-        raise SetupError.new "Invalid test identifier '#{_test}'" if test.nil?
+      def passes(_test=nil, _options={}, &_block)
+
+        if !_test.nil?
+          test = @tests[_test]
+          raise SetupError.new "Invalid test identifier '#{_test}'" if test.nil?
+        elsif !_block.nil?
+          test = _block
+          raise SetupError.new "Invalid block arity" if _block.arity > 1
+        else raise SetupError.new "Must provide a test name or a block" end
+
         if test.arity == 1
           user_value = self.class.load_value_for(@res, _options[:on])
           @ctx.instance_exec(user_value, &test)
         else @ctx.instance_eval &test end
       end
-      alias :checks :certifies
+      alias :checks :passes
 
       ## Tests whether a given expression evaluated in the resource context returns true.
       #

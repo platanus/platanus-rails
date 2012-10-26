@@ -36,14 +36,15 @@ describe Platanus::Canned2 do
 
       # Simple allows
       allow 'rute1#action1'
-      allow 'rute1#action2', upon(:current_user) { matches(:char1) }
-      allow 'rute1#action3', upon { match(:char1, on: "current_user.char1") }
-      allow 'rute1#action4', upon(:current_user) { matches(:param2, on: "char2") and checks(:test1) }
+      allow 'rute1#action2', upon(:current_user) { same(:char1) }
+      allow 'rute1#action3', upon { same(:char1, key: "current_user.char1") }
+      allow 'rute1#action4', upon(:current_user) { same(:param2, key: "char2") and checks(:test1) }
+      allow 'rute1#action5', upon(:current_user) { passes { current_user.char2 == params[:param2] } }
 
       # Complex routes
       allow 'rute1#action5' do
-        upon(:current_user) { matches(:char1) }
-        upon(:current_user) { matches(:param2, value: 55) or checks(:test1) }
+        upon(:current_user) { same(:char1) }
+        upon(:current_user) { same(:param2, value: 55) or checks(:test1) }
       end
     end
   end
@@ -68,6 +69,9 @@ describe Platanus::Canned2 do
       end
       it "does not authorize on rute with context, match and test with bad credentials" do
         Roles.can?(bad_ctx, :user, 'rute1#action4').should be_false
+      end
+      it "does authorize on rute with context and inline test" do
+        Roles.can?(good_ctx, :user, 'rute1#action5').should be_true
       end
     end
 
