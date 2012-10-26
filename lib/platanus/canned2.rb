@@ -44,7 +44,7 @@ module Platanus
             next if !self.class.brk_excluded.nil? and self.class.brk_excluded.include? params[:action].to_sym
 
             # call initializer block
-            profiles = _provider.nil? ? self.send(_provider) : self.instance_eval(&_block)
+            profiles = if _provider.nil? then self.instance_eval(&_block) else self.send(_provider) end
             raise AuthError if profiles.nil?
             profiles = [profiles] unless profiles.is_a? Array
 
