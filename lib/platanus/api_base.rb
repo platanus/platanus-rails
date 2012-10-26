@@ -35,9 +35,14 @@ module Platanus
         api_respond_error(:bad_request, { msg: 'invalid_attributes', errors: exc.record.errors } )
       end
 
-      # Platanus error support (of course)
+      # Platanus error support
       base.rescue_from 'Platanus::StatusError' do |exc|
         api_respond_error(exc.status, { msg: exc.message })
+      end
+
+      # Canned error support
+      base.rescue_from 'Platanus::Canned2::AuthError' do |exc|
+        api_respond_error(:unauthorized, { msg: 'canned' })
       end
 
       base.extend ClassMethods
