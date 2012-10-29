@@ -37,14 +37,16 @@ module Platanus
         elsif self.column_names.include? "#{top_value_prop}_id"
           belongs_to top_value_prop.to_sym, class_name: tname_class
         else
+          instance_var = "@_last_#{tname_single}".to_sym
           send :define_method, top_value_prop do
             # Storing the last stacked value will not prevent race conditions
             # when simultaneous updates occur.
-            return @_stacked_last unless @_stacked_last.nil?
-            @_stacked_last = self.send(tname).first
+            last = instance_variable_get instance_var
+            return last unless last.nil?
+            instance_variable_set(instance_var, self.send(tname).first)
           end
           send :define_method, "#{top_value_prop}=" do |_top|
-            @_stacked_last = _top
+            instance_variable_set(instance_var, _top)
           end
         end
         send :private, "#{top_value_prop}="
