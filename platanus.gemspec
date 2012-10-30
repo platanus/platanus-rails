@@ -14,4 +14,6 @@ Gem::Specification.new do |gem|
   gem.name          = "platanus"
   gem.require_paths = ["lib","lib/platanus"]
   gem.version       = Platanus::VERSION
+
+  gem.add_runtime_dependency "multi_json", [">= 1.3.2"]
 end
