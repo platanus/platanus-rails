@@ -195,6 +195,16 @@ module Platanus
         @def_matcher = _def_matcher
       end
 
+      ## Test whether the current action matches a list of actions
+      def action_is(*_actions)
+        _actions.any? { |a| a.to_s == @ctx.action_name }
+      end
+
+      ## Test whether the current action is no in list of actions
+      def action_is_not(*_actions)
+        !_actions.any? { |a| a.to_s == @ctx.action_name }
+      end
+
       ## Tests for a match between one of the request's parameters and a resource expression.
       #
       # **IMPORTANT** if no resource is provided the current controller instance is used instead.
