@@ -5,7 +5,7 @@
 class JSONSym
 
   def self.load(_str)
-    return nil if _str.nil? or str == "null"
+    return nil if _str.nil? or _str == "null"
     MultiJson.load(_str, symbolize_keys: true)
   end
 
