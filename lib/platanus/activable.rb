@@ -47,6 +47,8 @@ module Platanus
       self.transaction do
         run_callbacks :remove do
 
+          # TODO: disable update callbacks and validations!
+
           # Retrieve dependant properties and remove them.
           self.class.reflect_on_all_associations.select do |assoc|
             if assoc.options[:dependent] == :destroy
