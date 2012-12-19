@@ -16,4 +16,5 @@ Gem::Specification.new do |gem|
   gem.version       = Platanus::VERSION
 
   gem.add_runtime_dependency "multi_json", [">= 1.3.2"]
+  gem.add_development_dependency "rspec"
 end
