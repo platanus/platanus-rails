@@ -42,12 +42,25 @@ module Platanus
       self.removed_at.nil?
     end
 
+    # Clones current object and then removes it.
+    def replace!
+      # self.class.transaction do
+      #   clone = self.class.new
+      #   self.attributes.each do |key, value|
+      #     next if ['id','created_at','removed_at'].include? key
+      #     clone.send(:write_attribute, key, value)
+      #   end
+      #   yield
+      #   clone.save!
+      #   self.remove!
+      #   return clone
+      # end
+    end
+
     # Deactivates a single record.
     def remove!
       self.transaction do
         run_callbacks :remove do
-
-          # TODO: disable update callbacks and validations!
 
           # Retrieve dependant properties and remove them.
           self.class.reflect_on_all_associations.select do |assoc|
@@ -57,8 +70,8 @@ module Platanus
             end
           end
 
-          self.removed_at = DateTime.now
-          self.save!
+          # Use update column to prevent update callbacks from being ran.
+          self.update_column(:removed_at, DateTime.now)
         end
       end
     end
