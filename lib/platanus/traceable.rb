@@ -37,38 +37,38 @@ module Platanus
 
     def __trace_create # :nodoc:
       controller = ActionController::Base.current
-      if controller.respond_to? :trace_user_id and self.respond_to? :created_by=
+      if controller and controller.respond_to? :trace_user_id and self.respond_to? :created_by=
         self.created_by = controller.trace_user_id
       end
       yield
-      controller.trace(:create, self) if controller.respond_to? :trace
+      controller.trace(:create, self) if controller and controller.respond_to? :trace
     end
 
     def __trace_update # :nodoc:
       controller = ActionController::Base.current
-      if controller.respond_to? :trace_user_id and self.respond_to? :updated_by=
+      if controller and controller.respond_to? :trace_user_id and self.respond_to? :updated_by=
         self.updated_by = controller.trace_user_id
       end
       yield
-      controller.trace(:update, self) if controller.respond_to? :trace
+      controller.trace(:update, self) if controller and controller.respond_to? :trace
     end
 
     def __trace_destroy # :nodoc:
       controller = ActionController::Base.current
-      if controller.respond_to? :trace_user_id and self.respond_to? :destroyed_by=
+      if controller and controller.respond_to? :trace_user_id and self.respond_to? :destroyed_by=
         self.destroyed_by = controller.trace_user_id
       end
       yield
-      controller.trace(:destroy, self) if controller.respond_to? :trace
+      controller.trace(:destroy, self) if controller and controller.respond_to? :trace
     end
 
     def __trace_remove # :nodoc:
       controller = ActionController::Base.current
-      if controller.respond_to? :trace_user_id and self.respond_to? :removed_by=
+      if controller and controller.respond_to? :trace_user_id and self.respond_to? :removed_by=
         self.removed_by = controller.trace_user_id
       end
       yield
-      controller.trace(:remove, self) if controller.respond_to? :trace
+      controller.trace(:remove, self) if controller and controller.respond_to? :trace
     end
   end
 end

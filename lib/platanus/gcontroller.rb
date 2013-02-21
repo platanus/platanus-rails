@@ -21,6 +21,6 @@ class ActionController::Base
   # * *Raises* :
   #   - +Platanus::NotInRequestError+ -> If current controller instance is not avaliable.
   def self.current
-    Thread.current[:controller] || (raise Platanus::NotInRequestError, 'Current controller not loaded')
+    Thread.current[:controller] # || (raise Platanus::NotInRequestError, 'Current controller not loaded')
   end
 end
