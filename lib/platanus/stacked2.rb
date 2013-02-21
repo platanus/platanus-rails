@@ -60,14 +60,14 @@ module Platanus
 
         # When called inside callbacks, returns the new value being put at top of the stack.
         new_value_var = "@_stacked_#{tname}_new"
-        send :define_method, "#{tname_single}_will" do
+        send :define_method, "#{top_value_prop}_will" do
           instance_variable_get(new_value_var)
         end
 
         # When called inside callbacks, will return the top value unless a new value is
         # being pushed, in that case it returns the new value
         last_value_var = "@_stacked_#{tname}_last"
-        send :define_method, "#{tname_single}_is" do
+        send :define_method, "#{top_value_prop}_is" do
           instance_variable_get(last_value_var)
         end
 
