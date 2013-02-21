@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "platanus"
-  gem.require_paths = ["lib","lib/platanus"]
+  gem.require_paths = ["lib"]
   gem.version       = Platanus::VERSION
 
   gem.add_runtime_dependency "multi_json", [">= 1.3.2"]

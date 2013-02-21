@@ -7,6 +7,7 @@ require 'platanus/traceable'
 require 'platanus/layered'
 require 'platanus/enum'
 require 'platanus/http_helpers'
+require 'platanus/model_shims'
 
 # require 'platanus/onetime'
 # require 'platanus/gcontroller'
