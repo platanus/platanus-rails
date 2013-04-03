@@ -61,6 +61,7 @@ module Platanus
     def remove!
       self.transaction do
         run_callbacks :remove do
+          notify_observers :before_remove
 
           # Retrieve dependant properties and remove them.
           self.class.reflect_on_all_associations.select do |assoc|
@@ -72,6 +73,7 @@ module Platanus
 
           # Use update column to prevent update callbacks from being ran.
           self.update_column(:removed_at, DateTime.now)
+          notify_observers :after_remove
         end
       end
     end
