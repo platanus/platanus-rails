@@ -157,38 +157,38 @@ module Platanus
         if _options.delete(:mirroring)
           stacked_model.accessible_attributes.each do |attr_name|
 
-            unless self.method_defined? "#{attr_name}="
-              send :define_method, "#{attr_name}=" do |value|
-                mirror = instance_variable_get(mirror_cache_var)
-                mirror = instance_variable_set(mirror_cache_var, {}) if mirror.nil?
-                mirror[attr_name] = value
-              end
-            else
-              Rails.logger.warn "stacked: failed to mirror setter for #{attr_name} in #{self.to_s}"
+            if self.method_defined? "#{attr_name}="
+              Rails.logger.warn "stacked: overriding setter for #{attr_name} in #{self.to_s}"
             end
 
-            unless self.method_defined? attr_name
-              send :define_method, attr_name do
-                mirror = instance_variable_get(mirror_cache_var)
-                return mirror[attr_name] if !mirror.nil? and mirror.has_key? attr_name
-
-                return self.send(prefix + attr_name) if self.respond_to? prefix + attr_name # return cached value if avaliable
-                top = self.send top_value_prop
-                return nil if top.nil?
-                return top.send attr_name
-              end
-
-              send :define_method, "#{attr_name}_changed?" do
-                mirror = instance_variable_get(mirror_cache_var)
-                return true if !mirror.nil? and mirror.has_key? attr_name
-                return self.send(prefix + attr_name + '_changed?') if self.respond_to? prefix + attr_name + '_changed?' # return cached value if avaliable
-                return true # for now just return true for non cached attributes
-              end
-
-              attr_accessible attr_name
-            else
-              Rails.logger.warn "stacked: failed to mirror getter for #{attr_name} in #{self.to_s}"
+            if self.method_defined? attr_name
+              Rails.logger.warn "stacked: overriding getter for #{attr_name} in #{self.to_s}"
             end
+
+            send :define_method, "#{attr_name}=" do |value|
+              mirror = instance_variable_get(mirror_cache_var)
+              mirror = instance_variable_set(mirror_cache_var, {}) if mirror.nil?
+              mirror[attr_name] = value
+            end
+
+            send :define_method, attr_name do
+              mirror = instance_variable_get(mirror_cache_var)
+              return mirror[attr_name] if !mirror.nil? and mirror.has_key? attr_name
+
+              return self.send(prefix + attr_name) if self.respond_to? prefix + attr_name # return cached value if avaliable
+              top = self.send top_value_prop
+              return nil if top.nil?
+              return top.send attr_name
+            end
+
+            send :define_method, "#{attr_name}_changed?" do
+              mirror = instance_variable_get(mirror_cache_var)
+              return true if !mirror.nil? and mirror.has_key? attr_name
+              return self.send(prefix + attr_name + '_changed?') if self.respond_to? prefix + attr_name + '_changed?' # return cached value if avaliable
+              return true # for now just return true for non cached attributes
+            end
+
+            attr_accessible attr_name
           end
 
           # before saving model, load changes from virtual attributes.
