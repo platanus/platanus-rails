@@ -1,20 +1,31 @@
 require "platanus/version"
 
-require 'platanus/canned'
-require 'platanus/stacked'
+require 'platanus/canned'     # TODO: deprecated, remove
+
+# Serializers
+require 'platanus/serializers/tag_set'
+require 'platanus/serializers/json_sym'
+
+# active record behaviors
+require 'platanus/stacked'    # TODO: deprecated, remove
 require 'platanus/activable'
 require 'platanus/traceable'
-require 'platanus/layered'
-require 'platanus/enum'
-require 'platanus/http_helpers'
-require 'platanus/model_shims'
+require 'platanus/layered'    # TODO: deprecated, remove
 
-# require 'platanus/onetime'
+# active record attribute related
+require 'platanus/tag_set'
+require 'platanus/enum'
+require 'platanus/model_shims'
+# require 'platanus/onetime'  # TODO: deprecated, remove
+
+# boilerplate
+require 'platanus/http_helpers' # TODO: deprecate in favor of api_boilerplate => first improve boilerplate
+
 # require 'platanus/gcontroller'
+
+# Template engines connectors
 # require 'platanus/template/spreadsheet'
 # require 'platanus/template/prawn'
-
-require 'platanus/serializers/json_sym'
 
 module Platanus
   # Your code goes here...
