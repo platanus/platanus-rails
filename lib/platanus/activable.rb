@@ -27,13 +27,13 @@ module Platanus
       end
 
       ## Shorthand method for adding callbacks before item removal
-      def before_remove(_callback)
-        self.set_callback :remove, :before, _callback
+      def before_remove(*_args, &_block)
+        self.set_callback :remove, :before, *_args, &_block
       end
 
       ## Shorthand method for adding callbacks after item removal
-      def after_remove(_callback)
-        self.set_callback :remove, :after, _callback
+      def after_remove(*_args, &_block)
+        self.set_callback :remove, :after, *_args, &_block
       end
     end
 
