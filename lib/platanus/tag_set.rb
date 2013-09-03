@@ -69,9 +69,9 @@ module Platanus::TagSetAttr
           params = []; ex_sql = []
           Array(_opt[:none]).each do |token|
             params << "%::#{token}::%"
-            ex_sql << "#{_name} is NULL OR #{_name} NOT LIKE ?"
+            ex_sql << "#{_name} NOT LIKE ?"
           end
-          target = target.where("#{ex_sql.join(' AND ')}", *params) if params.length > 0
+          target = target.where("#{_name} is NULL OR (#{ex_sql.join(' AND ')})", *params) if params.length > 0
         end
 
         return target
