@@ -4,6 +4,12 @@ Platan.us toolbelt.
 
 This gem includes various ruby and rails utility classes we use across most of our rails proyects.
 
+## Platanus Rails is no longer maintained
+
+We will leave the Issues open as a discussion forum only.
+We do not guarantee a response from us in the Issues.
+We are no longer accepting pull requests.
+
 ## Installation
 
 Add this line to your application's Gemfile:
